@@ -1,7 +1,7 @@
 import {  toast } from 'react-toastify';
 
 // const baseUrl = process.env.GROCERYLIST_PATH;
-const baseUrl = process.env.GROCERYLIST_API_PATH + "/api";
+const baseUrl = "http://localhost:5000" + "/api";
 
 const errors = [400, 404, 409, 500, 503]
 
