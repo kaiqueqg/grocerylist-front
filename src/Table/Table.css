@@ -1,0 +1,22 @@
+.header-row{
+  background-color: #12121200;
+  color: beige;
+  border-bottom: 1px solid beige;
+}
+
+.category-add-image{
+  border-width: 2px;
+  border-style: solid;
+  border-color: #ffffff00;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+}
+
+.category-add-image:hover{
+  border-width: 0px;
+}
+
+.info-text{
+  color: beige;
+}

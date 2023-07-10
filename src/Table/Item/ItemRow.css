@@ -1,0 +1,50 @@
+.item-row-color-one{
+  background-color: #282C34
+}
+
+.item-row-color-two{
+  background-color: #21242b
+}
+
+.item-row-text{
+  vertical-align: middle;
+  color: beige;
+  text-align: left;
+}
+
+.item-row-input{
+  color: beige;
+  background-color: #282C34;
+}
+
+.form-control:focus{
+  color: beige;
+  border-color: red;
+  background-color: #282C34;
+}
+
+.checked-image{
+  border-width: 2px;
+  border-style: solid;
+  border-color: #ffffff00;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+}
+
+.checked-image:hover{
+  border-width: 0px;
+}
+
+.trash-image{
+  border-width: 2px;
+  border-style: solid;
+  border-color: #ffffff00;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+}
+
+.trash-image:hover{
+  border-width: 0px;
+}

@@ -1,0 +1,8 @@
+.login-row{
+  margin: 20px;
+}
+
+.login-col{
+  display: flex;
+  align-items: center;
+}
