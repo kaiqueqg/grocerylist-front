@@ -2,11 +2,13 @@ import React from 'react';
 import './Login.css'
 import request from '../../Requests/RequestFactory'
 import { User } from '../../Types'
-import { toast } from 'react-toastify';
 import Loading from '../../Loading/Loading';
+import Settings from '../../Settings/Settings';
+import { toast } from 'react-toastify';
 
 interface Props{
   changeToLogged: (value :boolean) => void,
+  changeBaseUrl: (baseurl: string) => void,
   baseUrl: string,
   isLogged: boolean
 }
@@ -48,6 +50,17 @@ class Login extends React.Component<Props, States>{
 
   requestAuthenticationToken = () => {
     const { username, password } = this.state;
+
+    if(username.trim() === ""){
+      toast.warning("Type username to login!");
+      return;
+    }
+
+    if(password.trim() === ""){
+      toast.warning("Type password to login!");
+      return;
+    }
+
     const user: User = {
       username: username,
       password: password
@@ -59,10 +72,12 @@ class Login extends React.Component<Props, States>{
       try {
         const response = await request(this.props.baseUrl + '/Login', 'POST', JSON.stringify(user));
 
-        if(response.ok){
-          const jsonData = await response.json();
-          localStorage.setItem('jwt', jsonData.token);
-          this.login();
+        if(response !== undefined) {
+          if(response.ok){
+            const jsonData = await response.json();
+            localStorage.setItem('jwt', jsonData.token);
+            this.login();
+          }
         }
       } catch (error) {
         console.log('Error:', error);
@@ -123,24 +138,29 @@ class Login extends React.Component<Props, States>{
             <div className='row login-row'>
               <div className="col login-col">
                 <div className="input-group mb-3">
-                  <input key='username' type="text" onChange={this.changeUsername} className="form-control" placeholder="Username" aria-label="Username"></input>
+                  <Settings baseUrl={this.props.baseUrl} changeBaseUrlCallback={this.props.changeBaseUrl} ></Settings>
                 </div>
               </div>
               <div className="col login-col">
                 <div className="input-group mb-3">
-                  <input key='password' type="password" onChange={this.changePassword} className="form-control" placeholder="Password" aria-label="Server"></input>
+                  <input key='username' type="text" onChange={this.changeUsername} className="form-control username" placeholder="Username" aria-label="Username"></input>
                 </div>
               </div>
               <div className="col login-col">
                 <div className="input-group mb-3">
-                    <button type="button" className="btn btn-primary" onClick={this.requestAuthenticationToken}>Login</button>
+                  <input key='password' type="password" onChange={this.changePassword} className="form-control password" placeholder="Password" aria-label="Server"></input>
+                </div>
+              </div>
+              <div className="col login-col">
+                <div className="input-group mb-3">
+                    <button type="button" className="btn btn-login" onClick={this.requestAuthenticationToken}>Login</button>
                 </div>
               </div>
             </div>
             :
             <div className='row login-row'>
               <div className='col login-col'>
-                <button type="button" className="btn btn-danger" onClick={this.logout}>Logout</button>
+                <button type="button" className="btn btn-logout" onClick={this.logout}>Logout</button>
               </div>
             </div>)
             :

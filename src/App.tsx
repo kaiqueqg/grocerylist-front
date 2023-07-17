@@ -54,12 +54,7 @@ class App extends React.Component<Props, States>{
         {/* login row */}
         <div className='row'>
           <div className='col'style={{justifyContent: 'center', display: 'flex'}}>
-            <Settings baseUrl={baseUrl} changeBaseUrlCallback={this.changeBaseUrl} ></Settings>
-          </div>
-        </div>
-        <div className='row'>
-          <div className='col'style={{justifyContent: 'center', display: 'flex'}}>
-            <Login isLogged={isLogged} baseUrl={baseUrl} changeToLogged={this.changeToLogged}></Login>
+            <Login changeBaseUrl={this.changeBaseUrl} isLogged={isLogged} baseUrl={baseUrl} changeToLogged={this.changeToLogged}></Login>
           </div>
         </div>
         {isLogged && 

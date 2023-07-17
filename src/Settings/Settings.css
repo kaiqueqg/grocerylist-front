@@ -1,8 +1,14 @@
-.settings-row{
-  margin: 20px;
-}
-
 .settings-col{
+  margin-top: '10px';
   display: flex;
   align-items: center;
+}
+
+.settings-input{
+  color: beige;
+  background-color: #282C34;
+}
+
+.settings-input::placeholder{
+  color: beige;
 }

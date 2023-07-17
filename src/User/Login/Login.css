@@ -6,3 +6,45 @@
   display: flex;
   align-items: center;
 }
+
+.username{
+  color: beige;
+  background-color: #282C34;
+}
+
+.username::placeholder{
+  color: beige;
+}
+
+.password{
+  color: beige;
+  background-color: #282C34;
+}
+
+.password::placeholder{
+  color: beige;
+}
+
+.btn-login{
+  border-color: #1D1D1D;
+  color: #1D1D1D;
+  background-color: beige;
+}
+
+.btn-login:hover{
+  border-color: #1D1D1D;
+  color: #1D1D1D;
+  background-color: white;
+}
+
+.btn-logout{
+  border-color: #1D1D1D;
+  color: #1D1D1D;
+  background-color: beige;
+}
+
+.btn-logout:hover{
+  border-color: #1D1D1D;
+  color: #1D1D1D;
+  background-color: white;
+}

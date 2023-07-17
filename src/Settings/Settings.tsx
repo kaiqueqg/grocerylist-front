@@ -37,13 +37,7 @@ class Settings extends React.Component<Props, States>{
 
   render(): React.ReactNode {
     return(
-      <div className='row'>
-        <div className="col">
-          <div className="input-group mb-3">
-            <input key='baseurl' type="text" onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} className="form-control" placeholder={this.props.baseUrl} aria-label="baseurl"></input>
-          </div>
-        </div>
-      </div>
+      <input key='baseurl' type="text" onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} className="form-control settings-input" placeholder={this.props.baseUrl} aria-label="baseurl"></input>
     );
   }
 }

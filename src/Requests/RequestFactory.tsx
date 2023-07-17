@@ -1,6 +1,6 @@
 import {  toast } from 'react-toastify';
 
-const errors = [400, 404, 409, 500, 503]
+const errors = [400, 401, 404, 409, 500, 503]
 
 async function request(
   endpoint: string, 
