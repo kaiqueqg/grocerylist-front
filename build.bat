@@ -1,1 +1,1 @@
-docker build -t front .
+docker build -t kaiqueqg/grocerylist-front .

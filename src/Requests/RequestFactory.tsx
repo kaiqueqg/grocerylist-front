@@ -1,8 +1,5 @@
 import {  toast } from 'react-toastify';
 
-// const baseUrl = process.env.GROCERYLIST_PATH;
-const baseUrl = "http://localhost:5000" + "/api";
-
 const errors = [400, 404, 409, 500, 503]
 
 async function request(
@@ -18,7 +15,7 @@ async function request(
   if(token !== null) headers['Authorization'] = "Bearer " + token;
 
   try {
-    const response = await fetch(baseUrl + endpoint, {
+    const response = await fetch(endpoint, {
       headers,
       method,
       mode: 'cors',

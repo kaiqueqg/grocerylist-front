@@ -6,7 +6,9 @@ import { toast } from 'react-toastify';
 import Loading from '../../Loading/Loading';
 
 interface Props{
-  changeToLogged: (value :boolean) => void
+  changeToLogged: (value :boolean) => void,
+  baseUrl: string,
+  isLogged: boolean
 }
 
 interface States{
@@ -22,7 +24,7 @@ class Login extends React.Component<Props, States>{
     super(props);
 
     this.state = {
-      isLogged: false,
+      isLogged: this.props.isLogged,
       isLogging: false,
       username: '',
       password: ''
@@ -55,11 +57,11 @@ class Login extends React.Component<Props, States>{
       this.setState({ isLogging: true })
 
       try {
-        const response = await request('/Login', 'POST', JSON.stringify(user));
+        const response = await request(this.props.baseUrl + '/Login', 'POST', JSON.stringify(user));
 
         if(response.ok){
           const jsonData = await response.json();
-          localStorage.setItem('jwt', jsonData.token)
+          localStorage.setItem('jwt', jsonData.token);
           this.login();
         }
       } catch (error) {
@@ -85,7 +87,6 @@ class Login extends React.Component<Props, States>{
   }
 
   login = () => {
-    // toast('log in');
     const token = localStorage.getItem('jwt');
 
     if(token != null && token !== undefined){
@@ -98,6 +99,7 @@ class Login extends React.Component<Props, States>{
         this.setState({ isLogged :true});
       }
       else{
+        localStorage.removeItem('jwt');
         this.props.changeToLogged(false);
         this.setState({ isLogged :false});
       }

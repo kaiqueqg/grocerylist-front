@@ -1,0 +1,8 @@
+.settings-row{
+  margin: 20px;
+}
+
+.settings-col{
+  display: flex;
+  align-items: center;
+}

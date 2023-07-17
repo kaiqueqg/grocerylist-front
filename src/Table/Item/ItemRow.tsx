@@ -6,9 +6,10 @@ import { toast } from 'react-toastify';
 import Loading from '../../Loading/Loading';
 
 interface Props{
-  item: Item, 
+  item: Item,
   updateItemsDisplay: () => Promise<void>, 
-  isPair: boolean
+  isPair: boolean,
+  baseUrl: string
 }
 
 interface States{
@@ -50,7 +51,7 @@ class ItemRow extends React.Component<Props,States>{
   deleteItem = async () =>{
     this.setState({ isDeleting: true });
 
-    const response = await request('/DeleteItem', 'DELETE', JSON.stringify(this.state.item));
+    const response = await request(this.props.baseUrl + '/DeleteItem', 'DELETE', JSON.stringify(this.state.item));
     
     if(response !== undefined && response.ok){
       this.props.updateItemsDisplay();
@@ -68,7 +69,7 @@ class ItemRow extends React.Component<Props,States>{
     this.setState({ isSavingIsChecked: true });
 
     const item: Item = { ...this.state.item, isChecked: !this.state.item.isChecked};
-    const response = await request('/PatchItem', 'PATCH', JSON.stringify(item));
+    const response = await request(this.props.baseUrl + '/PatchItem', 'PATCH', JSON.stringify(item));
 
     if(response !== undefined && response.ok){
       this.setState({
@@ -108,7 +109,7 @@ class ItemRow extends React.Component<Props,States>{
     if(event.key === 'Enter'){
       if(newText !== item.text) {
         this.setState({ isSavingText: true });
-        const response = await request('/PatchItem', 'PATCH', JSON.stringify({...item, text: newText}));
+        const response = await request(this.props.baseUrl + '/PatchItem', 'PATCH', JSON.stringify({...item, text: newText}));
   
         if(response !== undefined && response.ok){
           this.setState({

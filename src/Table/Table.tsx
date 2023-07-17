@@ -7,11 +7,11 @@ import request from '../Requests/RequestFactory';
 import Loading from '../Loading/Loading';
 
 interface Props{
-  data: GroceryList
+  baseUrl: string
 }
 
 interface States{
-  data: GroceryList
+  data: GroceryList,
   isGettingCategoryList: boolean,
   areAllOpen: boolean,
   isServerUp: boolean
@@ -23,7 +23,7 @@ class Table extends React.Component<Props, States> {
     super(props);
 
     this.state = {
-      data: this.props.data,
+      data: {categories: []},
       isGettingCategoryList: false,
       areAllOpen: false,
       isServerUp: true
@@ -38,8 +38,8 @@ class Table extends React.Component<Props, States> {
     this.setState({
       isGettingCategoryList: true
     }, async () => {
-      const response = await request('/GetCategoryList', 'GET', undefined, async () => {
-        const response = await request('/IsUp', 'GET', undefined, () => {
+      const response = await request(this.props.baseUrl + '/GetCategoryList', 'GET', undefined, async () => {
+        const response = await request(this.props.baseUrl + '/IsUp', 'GET', undefined, () => {
           this.setState({ isServerUp: false });
         });
       });
@@ -68,7 +68,7 @@ class Table extends React.Component<Props, States> {
       isOpen: false
     }
 
-    const response = await request('/PutCategory', 'PUT', JSON.stringify(newCategory));
+    const response = await request(this.props.baseUrl + '/PutCategory', 'PUT', JSON.stringify(newCategory));
 
     if(response != null){
       if(response.ok){
@@ -84,7 +84,7 @@ class Table extends React.Component<Props, States> {
   }
 
   // changeDisplayAllCategories = async (value: boolean) => {
-  //   const response = await request('/ChangeDisplayAllCategories?value=' + value, 'GET');
+  //   const response = await request(this.props.baseUrl + '/ChangeDisplayAllCategories?value=' + value, 'GET');
   //   if(response != null){
   //     if(response.ok){
   //       this.setState({
@@ -126,7 +126,7 @@ class Table extends React.Component<Props, States> {
             <tbody key='tbody'>
               { data.categories.map((category) => (
                 <React.Fragment key={category.id + 'fragment'}>
-                  <CategoryRow key={'category' + category.id} category={category} redrawCallback={this.redrawCallback}></CategoryRow>
+                  <CategoryRow key={'category' + category.id} baseUrl={this.props.baseUrl} category={category} redrawCallback={this.redrawCallback}></CategoryRow>
                 </React.Fragment>
               ))}
             </tbody>

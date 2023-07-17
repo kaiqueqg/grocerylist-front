@@ -8,7 +8,8 @@ import Loading from '../../Loading/Loading';
 
 interface Props{
   category: Category,
-  redrawCallback: () => void
+  redrawCallback: () => void,
+  baseUrl: string
 }
 
 interface States{
@@ -54,12 +55,11 @@ class CategoryRow extends React.Component<Props, States>{
     else{
       this.deleteCategory();
     }
-      
   }
 
   deleteCategory = async () => {    
     this.setState({ isDeleting: true });
-    const response = await request('/DeleteCategory', 'DELETE', JSON.stringify(this.state.category));
+    const response = await request(this.props.baseUrl + '/DeleteCategory', 'DELETE', JSON.stringify(this.state.category));
   
     if(response !== undefined && response.ok){
       this.props.redrawCallback();
@@ -85,7 +85,7 @@ class CategoryRow extends React.Component<Props, States>{
     if(event.key === 'Enter'){
       if(category.text !== newText) {
         this.setState({ isSavingText: true })
-        const response = await request('/PatchCategory', 'PATCH', JSON.stringify({...category, text: newText}), () => {
+        const response = await request(this.props.baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, text: newText}), () => {
           toast.warning("There was a problem trying to modify the category name, server may be down.", { autoClose: 10000 });
         });
 
@@ -154,7 +154,7 @@ class CategoryRow extends React.Component<Props, States>{
 
     this.setState({ isCreatingNewItem: true });
 
-    const response = await request('/PutItem', 'PUT', JSON.stringify(emptyItem), () => {
+    const response = await request(this.props.baseUrl + '/PutItem', 'PUT', JSON.stringify(emptyItem), () => {
       toast.warning("There was a problem trying to create a new item, server may be down.")
     });
 
@@ -173,7 +173,7 @@ class CategoryRow extends React.Component<Props, States>{
     this.setState({
       isRequestingItems: true
     }, async () =>{
-      const response = await request('/GetItemListInCategory?categoryId='+ category.id, 'GET');
+      const response = await request(this.props.baseUrl + '/GetItemListInCategory?categoryId='+ category.id, 'GET');
 
       if(response !== undefined && response.ok){
         const items = await response.json();
@@ -195,7 +195,7 @@ class CategoryRow extends React.Component<Props, States>{
     this.setState({
       isRequestingItems: true
     }, async () =>{
-      const response = await request('/GetItemListInCategory?categoryId=' + category.id, 'GET');
+      const response = await request(this.props.baseUrl + '/GetItemListInCategory?categoryId=' + category.id, 'GET');
 
       if(response !== undefined && response.ok){
         const items = await response.json();
@@ -214,7 +214,7 @@ class CategoryRow extends React.Component<Props, States>{
   changeItemsDisplay = async () => {
     const { category } = this.state;
     const newState = !category.isOpen;
-    const response = await request('/PatchCategory', 'PATCH', JSON.stringify({...category, isOpen: newState}))
+    const response = await request(this.props.baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, isOpen: newState}))
 
     if(response != null){
       if(response.ok){
@@ -289,7 +289,7 @@ class CategoryRow extends React.Component<Props, States>{
             <td></td>
           </tr>
           :
-          items.map((item: Item, index: number) => (<ItemRow key={'item' + item.id} item={item} updateItemsDisplay={this.updateItemsDisplay} isPair={index % 2===0}></ItemRow>)))}
+          items.map((item: Item, index: number) => (<ItemRow key={'item' + item.id} item={item} baseUrl={this.props.baseUrl} updateItemsDisplay={this.updateItemsDisplay} isPair={index % 2===0}></ItemRow>)))}
       </React.Fragment>
     );
   }
