@@ -1,14 +1,9 @@
 import React from 'react';
 import './App.css';
 import './Global.css';
-import request from './Requests/RequestFactory';
-import { ToastContainer, toast } from 'react-toastify';
-import { GroceryList, Category } from './Types';
+import { ToastContainer } from 'react-toastify';
 import Table from './Table/Table';
 import Login from './User/Login/Login';
-import Loading from './Loading/Loading';
-import Settings from './Settings/Settings';
-import { validateLocaleAndSetLanguage } from 'typescript';
 
 
 
