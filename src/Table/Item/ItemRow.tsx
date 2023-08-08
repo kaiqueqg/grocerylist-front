@@ -154,13 +154,13 @@ class ItemRow extends React.Component<Props,States>{
             {isSavingIsChecked ? 
               <Loading></Loading>
               :
-              <img src={item.isChecked ? './images/checked.png' : './images/unchecked.png'} className="checked-image" alt='meaningfull text' onClick={this.changeIsChecked}></img>}
+              <img src={item.isChecked ? './images/checked.png' : './images/unchecked.png'} className="checked-image" alt='meaningfull text' onClick={this.changeIsChecked}></img>
+            }
           </td>
           {isSavingText ? 
           <Loading></Loading>
           :
-          (
-            isEditing ? 
+          (isEditing ? 
             <td className="item-row-text">
               <input className='form-control item-row-input' type='text'  value={textValue.toUpperCase()} onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} autoFocus></input>
             </td>

@@ -83,21 +83,6 @@ class Table extends React.Component<Props, States> {
     }
   }
 
-  // changeDisplayAllCategories = async (value: boolean) => {
-  //   const response = await request(this.props.baseUrl + '/ChangeDisplayAllCategories?value=' + value, 'GET');
-  //   if(response != null){
-  //     if(response.ok){
-  //       this.setState({
-  //         areAllOpen: value
-  //       }, () => {
-  //         this.getCategoryList();
-  //       });
-  //     }else{
-  //       toast.error("Error...");
-  //     }
-  //   }
-  // }
-
   redrawCallback = () => {
     this.getCategoryList();
   }

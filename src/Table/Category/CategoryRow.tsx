@@ -145,6 +145,9 @@ class CategoryRow extends React.Component<Props, States>{
 
   addNewItem = async () => {
     const { category } = this.state;
+
+    if(!category.isOpen) this.changeItemsDisplay();
+
     const emptyItem: Item = {
       id: '',
       text: '',
@@ -278,7 +281,7 @@ class CategoryRow extends React.Component<Props, States>{
                 :
                 <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={this.addNewItem}></img>)
             }
-            {!category.isOpen && !isEditing && <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={this.addNewItem} style={{opacity: 0}}></img>}
+            {!category.isOpen && !isEditing && <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={this.addNewItem}></img>}
           </td>
         </tr>
         {category.isOpen &&
