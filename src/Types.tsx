@@ -12,7 +12,10 @@ export interface Item{
   id: string,
   text: string,
   isChecked: boolean,
-  myCategory: string
+  myCategory: string,
+  quantity: number,
+  quantityUnit: string,
+  goodPrice: string,
 }
 
 export interface User{

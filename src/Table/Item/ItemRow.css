@@ -12,9 +12,34 @@
   text-align: left;
 }
 
-.item-row-input{
+.item-row-details{
+  margin-top: 1%;
+}
+
+.item-row-details-line{
+  display: flex;
+  align-items: center;
+}
+
+.item-row-details-line-right{
+  display: flex;
+  align-items: right;
+}
+
+.item-row-details-text{
+  vertical-align: middle;
   color: beige;
+  text-align: left;
+  margin: 1%;
+  width: 20%;
+}
+
+.item-row-input{
+  margin: 1%;
+  color: beige;
+  text-align: 'left';
   background-color: #282C34;
+  width: 60%;
 }
 
 .form-control:focus{
@@ -36,7 +61,7 @@
   border-width: 0px;
 }
 
-.trash-image{
+.item-row-image{
   border-width: 2px;
   border-style: solid;
   border-color: #ffffff00;
@@ -45,6 +70,11 @@
   margin: 5px;
 }
 
-.trash-image:hover{
+.item-row-image-plusminus{
+  margin: 5px 0px 5px 0px;
+  padding: 5px 5px 5px 5px;
+}
+
+.item-row-image:hover{
   border-width: 0px;
 }

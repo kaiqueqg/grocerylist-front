@@ -65,7 +65,7 @@ class Table extends React.Component<Props, States> {
     let newCategory: Category = {
       id: '',
       text: '',
-      isOpen: false
+      isOpen: true,
     }
 
     const response = await request(this.props.baseUrl + '/PutCategory', 'PUT', JSON.stringify(newCategory));

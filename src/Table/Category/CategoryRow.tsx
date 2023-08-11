@@ -152,7 +152,10 @@ class CategoryRow extends React.Component<Props, States>{
       id: '',
       text: '',
       isChecked: false,
-      myCategory: category.id
+      myCategory: category.id,
+      quantity: 1,
+      goodPrice: '$',
+      quantityUnit: '',
     }
 
     this.setState({ isCreatingNewItem: true });
@@ -253,7 +256,7 @@ class CategoryRow extends React.Component<Props, States>{
     return(
       <React.Fragment>
         <tr className='category-row' >
-          <td>
+          <td style={{width: '15%'}}  >
             {category.isOpen ?
               <img src={'./images/down-chevron.png'} className="unfold-image" alt='meaningfull text' onClick={this.changeItemsDisplay}></img>
               :
@@ -261,7 +264,7 @@ class CategoryRow extends React.Component<Props, States>{
             }
           </td>
           {!isEditing ? 
-            <td onClick={this.handleRowClick}>
+            <td style={{width: '75%'}} onClick={this.handleRowClick}>
               {(isSavingText ?
               <Loading></Loading>
               :
@@ -272,7 +275,7 @@ class CategoryRow extends React.Component<Props, States>{
               <input className='form-control category-row-input' type='text' value={textValue.toUpperCase()} onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} autoFocus></input>
             </td>
           }
-          <td>
+          <td style={{width: '10%'}}>
             {isEditing && !isDeleting && <img src={'./images/trash.png'} className="trash-image" alt='meaningfull text' onClick={this.displayConfirmDeleteRow}></img>}
             {isEditing && isDeleting && <Loading></Loading>}
             {category.isOpen && !isEditing && 
@@ -288,7 +291,7 @@ class CategoryRow extends React.Component<Props, States>{
         (isRequestingItems ? 
           <tr>
             <td></td>
-            <td className="loading-items"><Loading></Loading></td>            
+              <td className="loading-items"><Loading></Loading></td>            
             <td></td>
           </tr>
           :
