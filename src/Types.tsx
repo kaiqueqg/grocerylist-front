@@ -18,10 +18,20 @@ export interface Item{
   goodPrice: string,
 }
 
-export interface User{
+export interface UserPrefsModel{
+  shouldCreateNewItemWhenCreateNewCategory: boolean,
+  hideQuantity: boolean,
+}
+
+export interface UserModel{
   id?: number,
   username: string,
   password?: string,
-  email?: string,
-  role?: string
+  userPrefs: UserPrefsModel,
+}
+
+export interface LoginModel{
+  user?: UserModel,
+  token: string,
+  errorMessage: string,
 }

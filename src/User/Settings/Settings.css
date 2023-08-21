@@ -1,0 +1,35 @@
+.settings-container{
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  align-items: center;
+}
+
+.settings-button{
+  color: beige;
+}
+
+.settings-button:hover{
+  background-color: beige;
+}
+
+.settings-button-disabled{
+  color: #5F5F5F;
+}
+
+.settings-button-disabled:hover{
+  background-color: beige;
+}
+
+.btn-logout{
+  border-color: #1D1D1D;
+  color: black;
+  background-color: #EE6C4D;
+  margin-top: 15px;
+}
+
+.btn-logout:hover{
+  border-color: #1D1D1D;
+  color: #1D1D1D;
+  background-color: white;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import './ItemRow.css';
-import { Item } from '../../Types';
+import { Item, UserPrefsModel } from '../../Types';
 import request from '../../Requests/RequestFactory'
 import { toast } from 'react-toastify';
 import Loading from '../../Loading/Loading';
@@ -9,7 +9,8 @@ interface Props{
   item: Item,
   updateItemsDisplay: () => Promise<void>, 
   isPair: boolean,
-  baseUrl: string
+  baseUrl: string,
+  userPrefs: UserPrefsModel,
 }
 
 interface States{
@@ -220,22 +221,22 @@ class ItemRow extends React.Component<Props,States>{
   }
 
   render(): React.ReactNode {
-    const { isPair } = this.props;
+    const { isPair, userPrefs } = this.props;
     const { item, isEditing, isDeleting, isSavingItem, isSavingIsChecked, textValue, quantityValue, quantityUnit, goodPrice } = this.state;
 
     let displayText = item.text;
     if(!isEditing){
-      if(item.quantity !== null) displayText = (item.quantity + 'x ') + displayText;
-      if(item.goodPrice !== null && item.goodPrice !== '') displayText = displayText + (' (' + item.goodPrice + ')');
+      if(!userPrefs.hideQuantity && item.quantity !== null) displayText = (item.quantity + 'x ') + displayText;
+      if(item.goodPrice !== null && item.goodPrice !== '' && item.goodPrice !== '$') displayText = displayText + (' (' + item.goodPrice + ')');
     }
 
     return(
       <React.Fragment>
         <tr className={isPair? 'item-row-color-one' : 'item-row-color-two'}>
-          <td>
+          <td style={{textAlign: 'center'}}>
             {isEditing && !isDeleting && <img src={'./images/trash.png'} className="item-row-image" alt='meaningfull text' onClick={this.displayConfirmDeleteRow}></img>}
             {isEditing && isDeleting && <Loading></Loading>}
-            {!isEditing && 
+            {!isEditing && !userPrefs.hideQuantity && 
               <React.Fragment>
                 <img className="item-row-image item-row-image-plusminus" src={'./images/minus.png'} alt='meaningfull text' onClick={this.decreaseQuantity}></img>
                 <img className="item-row-image item-row-image-plusminus" src={'./images/add.png'} alt='meaningfull text' onClick={this.increaseQuantity}></img>

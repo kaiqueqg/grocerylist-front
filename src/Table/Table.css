@@ -1,3 +1,13 @@
+.grocerylist-table{
+  margin: 1%;
+  width: 98%;
+  border: 1% solid red;
+}
+
+.grocerylist-table-title{
+  text-align: center;
+}
+
 .header-row{
   background-color: #12121200;
   color: beige;

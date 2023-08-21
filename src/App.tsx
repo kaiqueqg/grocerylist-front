@@ -3,17 +3,17 @@ import './App.css';
 import './Global.css';
 import { ToastContainer } from 'react-toastify';
 import Table from './Table/Table';
-import Login from './User/Login/Login';
-
-
+import User from './User/User';
+import { UserModel, UserPrefsModel } from './Types';
+import request from './Requests/RequestFactory';
 
 interface Props{
 }
 
 interface States{
-  isLogged: boolean,
   isServerUp: boolean,
-  baseUrl: string
+  baseUrl: string,
+  user: UserModel|null,
 }
 
 class App extends React.Component<Props, States>{
@@ -23,41 +23,82 @@ class App extends React.Component<Props, States>{
 
     if(storageBaseUrl === null) storageBaseUrl = "http://localhost:5000/api";
     this.state = {
-      isLogged: false,
       isServerUp: true,
-      baseUrl: storageBaseUrl
+      baseUrl: storageBaseUrl,
+      user: null,
     }
   }
 
-  changeToLogged = (value :boolean) => {
+  changeUser = (newUser: UserModel|null) => {
     this.setState({
-      isLogged: value
+      user: newUser,
     });
   }
 
   changeBaseUrl = (value: string) => {
     localStorage.setItem('grocerylistbaseurl', value);
     localStorage.removeItem('jwt');
-    this.setState({ baseUrl: value, isLogged: false });
+    this.setState({ baseUrl: value });
+  }
+
+  changeUserPrefs = async (newUserPrefs: UserPrefsModel) => {
+    const { user } = this.state;
+    if(user !== null) {
+      const newUser: UserModel = {...user, userPrefs: newUserPrefs};
+  
+      try {
+        const response = await request(this.state.baseUrl + '/PatchUserPrefs', 'PATCH', JSON.stringify(newUser));
+    
+        if(response !== undefined){
+          if(response.ok){
+            
+            this.setState({
+              user: newUser
+            });
+          }
+        }
+      } catch (err) { console.log('Error:', err); }
+    }
+  }
+
+  testIsServerIsUp = async () => {
+    const response = await request(this.state.baseUrl + '/IsUp', 'GET', undefined, () => {
+      this.setState({ isServerUp: false });
+    });
   }
 
   render(): React.ReactNode {
-    const { isLogged, baseUrl } = this.state;
-
+    const { baseUrl, user, isServerUp } = this.state;
+    
     return (
-      <div className="App">
-        {/* login row */}
-        <div className='row'>
-          <div className='col'style={{justifyContent: 'center', display: 'flex'}}>
-            <Login changeBaseUrl={this.changeBaseUrl} isLogged={isLogged} baseUrl={baseUrl} changeToLogged={this.changeToLogged}></Login>
+      <div className="container" style={{backgroundColor: '#282c34', height: '100vh'}}>
+        {isServerUp? 
+          <React.Fragment>
+            <div className='row'>
+              <div className='col'>
+                <User 
+                  changeBaseUrl={this.changeBaseUrl}
+                  changeUser={this.changeUser}
+                  changeUserPrefs={this.changeUserPrefs}
+                  baseUrl={baseUrl}
+                  user={user}></User>
+              </div>
+            </div>
+            {user !== null && user !== undefined &&
+              <div className='row'>
+                <div className='col'>
+                  <Table baseUrl={baseUrl} userPrefs={user.userPrefs} testIsServerUp={this.testIsServerIsUp}></Table>
+                </div>
+              </div>
+            }
+          </React.Fragment>
+          :
+          <div className='row'>
+            <div className='col '>
+              <h3 className='server-down' style={{color: 'beige'}}>SERVER IS DOWN</h3>
+            </div>
           </div>
-        </div>
-        {isLogged && 
-        <div className='row' style={{justifyContent: 'center', display: 'flex'}}>
-          <div className='col-6' >
-            <Table baseUrl={baseUrl}></Table>
-          </div>
-        </div>}
+        }
         <ToastContainer
         position="top-center"
         autoClose={1000}
@@ -65,9 +106,6 @@ class App extends React.Component<Props, States>{
         newestOnTop={false}
         closeOnClick
         rtl={false}
-        //pauseOnFocusLoss
-        //draggable
-        //pauseOnHover
         theme="dark"
         />
       </div>

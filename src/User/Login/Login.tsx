@@ -1,20 +1,19 @@
 import React from 'react';
 import './Login.css'
 import request from '../../Requests/RequestFactory'
-import { User } from '../../Types'
+import { LoginModel, UserModel } from '../../Types'
 import Loading from '../../Loading/Loading';
-import Settings from '../../Settings/Settings';
 import { toast } from 'react-toastify';
+import storage from '../../Storage/Storage';
 
 interface Props{
-  changeToLogged: (value :boolean) => void,
+  changeUser: (newUser: UserModel|null) => void,
   changeBaseUrl: (baseurl: string) => void,
+  logout: () => void,
   baseUrl: string,
-  isLogged: boolean
 }
 
 interface States{
-  isLogged: boolean,
   isLogging: boolean,
   username: string, 
   password: string
@@ -26,7 +25,6 @@ class Login extends React.Component<Props, States>{
     super(props);
 
     this.state = {
-      isLogged: this.props.isLogged,
       isLogging: false,
       username: '',
       password: ''
@@ -34,8 +32,7 @@ class Login extends React.Component<Props, States>{
   }
 
   componentDidMount(): void {
-    const { isLogged } = this.state;
-    if(!isLogged) this.login();
+    this.login();
   }
   
   parseJwt = (token :string) => {
@@ -61,9 +58,10 @@ class Login extends React.Component<Props, States>{
       return;
     }
 
-    const user: User = {
+    const user: UserModel = {
       username: username,
-      password: password
+      password: password,
+      userPrefs: {hideQuantity: false, shouldCreateNewItemWhenCreateNewCategory: false}
     };
 
     const fetchData = async () => {
@@ -74,9 +72,12 @@ class Login extends React.Component<Props, States>{
 
         if(response !== undefined) {
           if(response.ok){
-            const jsonData = await response.json();
-            localStorage.setItem('jwt', jsonData.token);
-            this.login();
+            const jsonData: LoginModel = await response.json();
+            if(jsonData.user !== undefined && jsonData.token !== undefined){
+              storage.setToken(jsonData.token);
+              storage.setUser(jsonData.user);
+              this.props.changeUser(jsonData.user);
+            }
           }
         }
       } catch (error) {
@@ -101,70 +102,60 @@ class Login extends React.Component<Props, States>{
     });
   }
 
-  login = () => {
-    const token = localStorage.getItem('jwt');
+  checkForLoginToken = () =>{
+    const token = storage.getToken();
 
     if(token != null && token !== undefined){
       const parsedToken = this.parseJwt(token);
       const now = new Date();
       const tokenDate = new Date(parsedToken.exp * 1000);
 
+      return tokenDate > now;
+    }
+
+    return false;
+  }
+
+  login = () => {
+    const token = storage.getToken();
+    const user = storage.getUser();
+
+    if(token != null && token !== undefined && user != null && user !== undefined){
+      const parsedToken = this.parseJwt(token);
+      const now = new Date();
+      const tokenDate = new Date(parsedToken.exp * 1000);
+
       if(tokenDate > now){
-        this.props.changeToLogged(true);
-        this.setState({ isLogged :true});
+        this.props.changeUser(storage.getUser());
       }
       else{
-        localStorage.removeItem('jwt');
-        this.props.changeToLogged(false);
-        this.setState({ isLogged :false});
+        this.props.logout();
       }
     }
   }
-  
-  logout = () => {
-    localStorage.removeItem('jwt');
-
-    this.props.changeToLogged(false);
-    this.setState({ isLogged :false});
-  }
 
   render(): React.ReactNode {
-    const { isLogged, isLogging } = this.state;
+    const { isLogging } = this.state;
 
     return(
-      <div>
+      <div className='login-container'>
         {!isLogging ? 
-          (!isLogged ? 
-            <div className='row login-row'>
-              <div className="col login-col">
-                <div className="input-group mb-3">
-                  <Settings baseUrl={this.props.baseUrl} changeBaseUrlCallback={this.props.changeBaseUrl} ></Settings>
-                </div>
-              </div>
-              <div className="col login-col">
-                <div className="input-group mb-3">
-                  <input key='username' type="text" onChange={this.changeUsername} className="form-control username" placeholder="Username" aria-label="Username"></input>
-                </div>
-              </div>
-              <div className="col login-col">
-                <div className="input-group mb-3">
-                  <input key='password' type="password" onChange={this.changePassword} className="form-control password" placeholder="Password" aria-label="Server"></input>
-                </div>
-              </div>
-              <div className="col login-col">
-                <div className="input-group mb-3">
-                    <button type="button" className="btn btn-login" onClick={this.requestAuthenticationToken}>Login</button>
-                </div>
-              </div>
+          <div className="col login-box">
+            <div className='login-row'>
+              <input key='baseurl' type="text" className="form-control baseurl" placeholder={this.props.baseUrl} aria-label="BaseUrl"></input>
             </div>
-            :
-            <div className='row login-row'>
-              <div className='col login-col'>
-                <button type="button" className="btn btn-logout" onClick={this.logout}>Logout</button>
-              </div>
-            </div>)
-            :
-            <Loading></Loading>
+            <div className="login-row">
+              <input className="form-control username" type="text" onChange={this.changeUsername}  placeholder="Username" aria-label="Username"></input>
+            </div>
+            <div className="login-row">
+              <input className="form-control password"  type="password" onChange={this.changePassword} placeholder="Password" aria-label="Server"></input>
+            </div>
+            <div className="login-row">
+              <button className="btn btn-login" type="button"  onClick={this.requestAuthenticationToken}>Login</button>
+            </div>
+          </div>
+          :
+          <Loading></Loading>
         }
       </div>
     );

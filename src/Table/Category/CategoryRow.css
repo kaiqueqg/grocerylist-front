@@ -24,6 +24,7 @@
 }
 
 .add-image{
+  cursor: pointer;
   border-width: 2px;
   border-style: solid;
   border-color: #ffffff00;
@@ -37,6 +38,7 @@
 }
 
 .trash-image{
+  cursor: pointer;
   border-width: 2px;
   border-style: solid;
   border-color: #ffffff00;
@@ -50,6 +52,7 @@
 }
 
 .fold-image{
+  cursor: pointer;
   border-width: 2px;
   border-style: solid;
   border-color: #ffffff00;
@@ -63,6 +66,7 @@
 }
 
 .unfold-image{
+  cursor: pointer;
   border-width: 2px;
   border-style: solid;
   border-color: #ffffff00;

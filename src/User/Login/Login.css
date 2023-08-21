@@ -1,10 +1,25 @@
-.login-row{
-  margin: 20px;
+.login-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.login-col{
-  display: flex;
-  align-items: center;
+.login-box{
+  max-width: 500px;
+}
+
+.login-row{
+  margin: 2% 1% 2% 1%;
+}
+
+.baseurl{
+  color: beige;
+  background-color: #282C34;
+}
+
+.baseurl::placeholder{
+  color: #5F5F5F  ;
 }
 
 .username{
@@ -13,7 +28,7 @@
 }
 
 .username::placeholder{
-  color: beige;
+  color: #5F5F5F  ;
 }
 
 .password{
@@ -22,7 +37,7 @@
 }
 
 .password::placeholder{
-  color: beige;
+  color: #5F5F5F;
 }
 
 .btn-login{
@@ -37,14 +52,3 @@
   background-color: white;
 }
 
-.btn-logout{
-  border-color: #1D1D1D;
-  color: #1D1D1D;
-  background-color: beige;
-}
-
-.btn-logout:hover{
-  border-color: #1D1D1D;
-  color: #1D1D1D;
-  background-color: white;
-}

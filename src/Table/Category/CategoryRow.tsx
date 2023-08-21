@@ -1,5 +1,5 @@
 import React from 'react';
-import { Item, Category } from '../../Types';
+import { Item, Category, UserPrefsModel } from '../../Types';
 import './CategoryRow.css';
 import { toast } from 'react-toastify';
 import request from '../../Requests/RequestFactory'
@@ -9,7 +9,8 @@ import Loading from '../../Loading/Loading';
 interface Props{
   category: Category,
   redrawCallback: () => void,
-  baseUrl: string
+  baseUrl: string,
+  userPrefs: UserPrefsModel,
 }
 
 interface States{
@@ -256,7 +257,7 @@ class CategoryRow extends React.Component<Props, States>{
     return(
       <React.Fragment>
         <tr className='category-row' >
-          <td style={{width: '15%'}}  >
+          <td style={{width: '15%', textAlign:'center'}}  >
             {category.isOpen ?
               <img src={'./images/down-chevron.png'} className="unfold-image" alt='meaningfull text' onClick={this.changeItemsDisplay}></img>
               :
@@ -264,7 +265,7 @@ class CategoryRow extends React.Component<Props, States>{
             }
           </td>
           {!isEditing ? 
-            <td style={{width: '75%'}} onClick={this.handleRowClick}>
+            <td style={{width: '75%', textAlign: 'center'}} onClick={this.handleRowClick}>
               {(isSavingText ?
               <Loading></Loading>
               :
@@ -295,7 +296,15 @@ class CategoryRow extends React.Component<Props, States>{
             <td></td>
           </tr>
           :
-          items.map((item: Item, index: number) => (<ItemRow key={'item' + item.id} item={item} baseUrl={this.props.baseUrl} updateItemsDisplay={this.updateItemsDisplay} isPair={index % 2===0}></ItemRow>)))}
+          items.map((item: Item, index: number) => (
+            <ItemRow 
+              key={'item' + item.id} 
+              item={item} 
+              baseUrl={this.props.baseUrl} 
+              userPrefs={this.props.userPrefs} 
+              updateItemsDisplay={this.updateItemsDisplay} 
+              isPair={index % 2===0}></ItemRow>
+          )))}
       </React.Fragment>
     );
   }
