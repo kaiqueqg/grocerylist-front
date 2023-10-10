@@ -1,7 +1,9 @@
+@import '../Colors.scss';
+
 .grocerylist-table{
-  margin: 1%;
-  width: 98%;
-  border: 1% solid red;
+  width: 70%;
+  margin: 10px 0px 50px 0px;
+  border: 1px solid $blue-darker;
 }
 
 .grocerylist-table-title{

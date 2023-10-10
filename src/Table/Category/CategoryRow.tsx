@@ -1,153 +1,118 @@
-import React from 'react';
-import { Item, Category, UserPrefsModel } from '../../Types';
-import './CategoryRow.css';
+import React, { useEffect, useState } from 'react';
+import { Item, Category } from '../../Types';
+import './CategoryRow.scss';
 import { toast } from 'react-toastify';
 import request from '../../Requests/RequestFactory'
 import ItemRow from '../Item/ItemRow';
 import Loading from '../../Loading/Loading';
+import { useUserContext } from '../../Contexts/UserContext';
 
-interface Props{
+interface CategoryProps{
   category: Category,
   redrawCallback: () => void,
-  baseUrl: string,
-  userPrefs: UserPrefsModel,
 }
 
-interface States{
-  category: Category,
-  isEditing: boolean,
-  isDeleting: boolean,
-  textValue: string,
-  isSavingText: boolean,
-  isCreatingNewItem: boolean,
-  isRequestingItems: boolean,
-  items: Item[]
-}
+const CategoryRow: React.FC<CategoryProps> = (props) => {
+  const [category, setCategory] = useState(props.category);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [textValue, setTextValue] = useState(props.category.text);
+  const [isSavingText, setIsSavingText] = useState(false);
+  const [isCreatingNewItem, setIsCreatingNewItem] = useState(false);
+  const [isRequestingItems, setIsRequestingItems] = useState(false);
+  const [items, setItems] = useState([]);
 
-class CategoryRow extends React.Component<Props, States>{
-  constructor(props: Props){
+  const {baseUrl} = useUserContext();
 
-    super(props);
-    this.state = {
-      category: props.category,
-      isEditing: false,
-      isDeleting: false,
-      textValue: props.category.text,
-      isSavingText: false,
-      isCreatingNewItem: false,
-      isRequestingItems: false,
-      items: []
-    };
-  }
+  useEffect(() => {if(category.isOpen) getItemList();}, []);
 
-  componentDidMount(): void {
-    if(this.state.category.isOpen) this.getItemList();
-  }
-
-  displayConfirmDeleteRow = () => {
-    if( this.state.items.length > 0){
+  const displayConfirmDeleteRow = () => {
+    if( items.length > 0){
       toast.warning('Are you sure?', {
-        closeButton: <button className='btn btn-warning' onClick={this.deleteCategory} style={{marginTop: '5px', marginBottom: '5px'}}>YES</button>,
+        closeButton: <button className='btn btn-warning' onClick={deleteCategory} style={{marginTop: '5px', marginBottom: '5px'}}>YES</button>,
         autoClose: 5000,
         draggable: false,
         pauseOnHover: false,
       });
     }
     else{
-      this.deleteCategory();
+      deleteCategory();
     }
   }
 
-  deleteCategory = async () => {    
-    this.setState({ isDeleting: true });
-    const response = await request(this.props.baseUrl + '/DeleteCategory', 'DELETE', JSON.stringify(this.state.category));
+  const deleteCategory = async () => {    
+    setIsDeleting(true);
+    const response = await request(baseUrl + '/DeleteCategory', 'DELETE', JSON.stringify(category));
   
     if(response !== undefined && response.ok){
-      this.props.redrawCallback();
+      props.redrawCallback();
     }
     else{
       toast('Delete item went wrong!');
     }
 
     setTimeout(() => {
-      this.setState({ isDeleting: false });
+      setIsDeleting(false);
     }, 1000); 
   }
 
-  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ textValue: event.target.value });
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTextValue(event.target.value);
   }
 
-  handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const { category } = this.state;
-    const newText: string = this.state.textValue.toUpperCase().trim();
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const newText: string = textValue.toUpperCase().trim();
     const inputElement = event.target as HTMLInputElement;
 
     if(event.key === 'Enter'){
       if(category.text !== newText) {
-        this.setState({ isSavingText: true })
-        const response = await request(this.props.baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, text: newText}), () => {
+        setIsSavingText(true);
+        const response = await request(baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, text: newText}), () => {
           toast.warning("There was a problem trying to modify the category name, server may be down.", { autoClose: 10000 });
         });
 
         if(response !== undefined && response.ok){
-          this.updateItemsDisplay();
-          this.setState({
-            category: {...category, text: newText},
-            isEditing: false
-          }, () => {
-            inputElement.blur();
-          });
+          updateItemsDisplay();
+          setCategory({...category, text: newText});
+          setIsEditing(false);
+          inputElement.blur();
         }
 
         setTimeout(() => {
-          this.setState({ isSavingText: false });
+          setIsSavingText(false);
         }, 1000);
       }
       else{
-        this.setState({
-          isEditing: false
-        }, () => {
-          inputElement.blur();
-        });
+        setIsEditing(false);
+        inputElement.blur();
       }
     }
     else{
       if(event.key === 'Escape') {
-        this.setState({
-          textValue: category.text,
-          isEditing: false
-        }, () => {
-          inputElement.blur();
-        });
+        setTextValue(category.text);
+        setIsEditing(false);
+        inputElement.blur();
       }
     }
   }
 
-  handleRowClick = (event: any) => {
-    if(!this.state.isEditing) {
-      this.setState({
-        isEditing: true
-      }, () => {
-        const inputElement = event.target as HTMLInputElement;
-        inputElement.focus();
-      });
+  const handleRowClick = (event: any) => {
+    if(!isEditing) {
+      setIsEditing(true);
+      const inputElement = event.target as HTMLInputElement;
+      inputElement.focus();
     }
   }
 
-  handleInputBlur = (event: any) => {
+  const handleInputBlur = (event: any) => {
     const inputElement = event.target as HTMLInputElement;
-    this.setState({
-      isEditing: false
-    }, () => {
-      inputElement.blur();
-    });
+    setIsEditing(false);
+    inputElement.blur();
   }
 
-  addNewItem = async () => {
-    const { category } = this.state;
+  const addNewItem = async () => {
 
-    if(!category.isOpen) this.changeItemsDisplay();
+    if(!category.isOpen) changeItemsDisplay();
 
     const emptyItem: Item = {
       id: '',
@@ -159,84 +124,69 @@ class CategoryRow extends React.Component<Props, States>{
       quantityUnit: '',
     }
 
-    this.setState({ isCreatingNewItem: true });
+    setIsCreatingNewItem(true);
 
-    const response = await request(this.props.baseUrl + '/PutItem', 'PUT', JSON.stringify(emptyItem), () => {
+    const response = await request(baseUrl + '/PutItem', 'PUT', JSON.stringify(emptyItem), () => {
       toast.warning("There was a problem trying to create a new item, server may be down.")
     });
 
     if(response !== undefined && response.ok){
-      this.updateItemsDisplay();
+      updateItemsDisplay();
     }
 
     setTimeout(() => {
-      this.setState({ isCreatingNewItem: false });
+      setIsCreatingNewItem(false);
     }, 500);
   }
 
-  updateItemsDisplay = async () => {
-    const { category } = this.state;
+  const updateItemsDisplay = async () => {
+    console.log('updateItemsDisplay');
+    setIsRequestingItems(true);
+    const response = await request(baseUrl + '/GetItemListInCategory?categoryId='+ category.id, 'GET');
 
-    this.setState({
-      isRequestingItems: true
-    }, async () =>{
-      const response = await request(this.props.baseUrl + '/GetItemListInCategory?categoryId='+ category.id, 'GET');
+    if(response !== undefined && response.ok){
+      const returnItems = await response.json();
 
-      if(response !== undefined && response.ok){
-        const items = await response.json();
-
-        this.setState({
-          isRequestingItems: false,
-          items
-        });
-      }
-      else{
-        //toast(response);
-      }
-    });
+      setIsRequestingItems(false);
+      setItems(returnItems);
+    }
+    else{
+      //toast(response);
+    }
   }
 
-  getItemList = async () => {
-    const { category } = this.state;
+  const getItemList = async () => {
 
-    this.setState({
-      isRequestingItems: true
-    }, async () =>{
-      const response = await request(this.props.baseUrl + '/GetItemListInCategory?categoryId=' + category.id, 'GET');
+    setIsRequestingItems(true);
 
-      if(response !== undefined && response.ok){
-        const items = await response.json();
+    const response = await request(baseUrl + '/GetItemListInCategory?categoryId=' + category.id, 'GET');
 
-        this.setState({
-          isRequestingItems: false,
-          items
-        });
-      }
-      else{
-        //toast(response);
-      }
-    });
+    if(response !== undefined && response.ok){
+      const returnItems = await response.json();
+
+      setIsRequestingItems(false);
+      setItems(returnItems);
+    }
+    else{
+      //toast(response);
+    }
   }
 
-  changeItemsDisplay = async () => {
-    const { category } = this.state;
+  const changeItemsDisplay = async () => {
     const newState = !category.isOpen;
-    const response = await request(this.props.baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, isOpen: newState}))
+    const response = await request(baseUrl + '/PatchCategory', 'PATCH', JSON.stringify({...category, isOpen: newState}))
 
     if(response != null){
       if(response.ok){
         const newCategory = await response.json();
 
-        this.setState({
-          category: newCategory
-        }, () => {
-          if(this.state.category.isOpen){
-            this.getItemList();
-          }
-          else{
-            this.setState({ items: [] })
-          }
-        })
+        setCategory(newCategory);
+        if(newCategory.isOpen){
+          getItemList();
+        }
+        else{
+          setItems([]);
+        }
       }
       else{
         toast.error('Error...');
@@ -244,70 +194,57 @@ class CategoryRow extends React.Component<Props, States>{
     }
   }
 
-  render(): React.ReactNode {
-    const { 
-      category,
-      isEditing,
-      isDeleting,
-      textValue,
-      isSavingText,
-      isCreatingNewItem,
-      isRequestingItems,
-      items } = this.state;
-    return(
-      <React.Fragment>
-        <tr className='category-row' >
-          <td style={{width: '15%', textAlign:'center'}}  >
-            {category.isOpen ?
-              <img src={'./images/down-chevron.png'} className="unfold-image" alt='meaningfull text' onClick={this.changeItemsDisplay}></img>
-              :
-              <img src={'./images/up-chevron.png'} className="fold-image" alt='meaningfull text' onClick={this.changeItemsDisplay}></img>
-            }
+  return(
+    <>
+      <tr className='category-row' >
+        <td style={{width: '15%', textAlign:'center'}}  >
+          {category.isOpen ?
+            <img src={'./images/down-chevron.png'} className="unfold-image" alt='meaningfull text' onClick={changeItemsDisplay}></img>
+            :
+            <img src={'./images/up-chevron.png'} className="fold-image" alt='meaningfull text' onClick={changeItemsDisplay}></img>
+          }
+        </td>
+        {!isEditing ? 
+          <td style={{width: '75%', textAlign: 'center'}} onClick={handleRowClick}>
+            {(isSavingText ?
+            <Loading></Loading>
+            :
+            <div className='category-row-text'>{category.text.toUpperCase()}</div>)}
           </td>
-          {!isEditing ? 
-            <td style={{width: '75%', textAlign: 'center'}} onClick={this.handleRowClick}>
-              {(isSavingText ?
+          :
+          <td>
+            <input className='form-control category-row-input' type='text' value={textValue.toUpperCase()} onChange={handleInputChange} onKeyDown={handleKeyDown} autoFocus></input>
+          </td>
+        }
+        <td style={{width: '10%'}}>
+          {isEditing && !isDeleting && <img src={'./images/trash.png'} className="trash-image" alt='meaningfull text' onClick={displayConfirmDeleteRow}></img>}
+          {isEditing && isDeleting && <Loading></Loading>}
+          {category.isOpen && !isEditing && 
+            (isCreatingNewItem ? 
               <Loading></Loading>
               :
-              <h3 className='category-row-text'>{category.text.toUpperCase()}</h3>)}
-            </td>
-            :
-            <td>
-              <input className='form-control category-row-input' type='text' value={textValue.toUpperCase()} onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} autoFocus></input>
-            </td>
+              <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={addNewItem}></img>)
           }
-          <td style={{width: '10%'}}>
-            {isEditing && !isDeleting && <img src={'./images/trash.png'} className="trash-image" alt='meaningfull text' onClick={this.displayConfirmDeleteRow}></img>}
-            {isEditing && isDeleting && <Loading></Loading>}
-            {category.isOpen && !isEditing && 
-              (isCreatingNewItem ? 
-                <Loading></Loading>
-                :
-                <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={this.addNewItem}></img>)
-            }
-            {!category.isOpen && !isEditing && <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={this.addNewItem}></img>}
-          </td>
+          {!category.isOpen && !isEditing && <img src={'./images/add.png'} className="add-image" alt='meaningfull text' onClick={addNewItem}></img>}
+        </td>
+      </tr>
+      {category.isOpen &&
+      (isRequestingItems ? 
+        <tr>
+          <td></td>
+            <td className="loading-items"><Loading></Loading></td>            
+          <td></td>
         </tr>
-        {category.isOpen &&
-        (isRequestingItems ? 
-          <tr>
-            <td></td>
-              <td className="loading-items"><Loading></Loading></td>            
-            <td></td>
-          </tr>
-          :
-          items.map((item: Item, index: number) => (
-            <ItemRow 
-              key={'item' + item.id} 
-              item={item} 
-              baseUrl={this.props.baseUrl} 
-              userPrefs={this.props.userPrefs} 
-              updateItemsDisplay={this.updateItemsDisplay} 
-              isPair={index % 2===0}></ItemRow>
-          )))}
-      </React.Fragment>
-    );
-  }
+        :
+        items.map((item: Item, index: number) => (
+          <ItemRow 
+            key={'item' + item.id} 
+            item={item} 
+            updateItemsDisplay={updateItemsDisplay} 
+            isPair={index % 2===0}></ItemRow>
+        )))}
+    </>
+  );
 }
 
 export default CategoryRow

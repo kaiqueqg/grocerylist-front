@@ -1,0 +1,28 @@
+.appContainer{
+  display: flex;
+  flex-direction: column;
+  background-color: #282c34;
+  border: 1px dotted rgba(255,255,255,0.1);
+  width: 100%;
+  align-items: center;
+}
+
+.server-down{
+  display:flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-row{
+  margin: 2% 1% 2% 1%;
+}
+
+.baseurl{
+  color: beige;
+  background-color: #282C34;
+}
+
+.baseurl::placeholder{
+  color: #5F5F5F  ;
+}

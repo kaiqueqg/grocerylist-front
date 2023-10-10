@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { UserProvider } from './Contexts/UserContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -10,7 +11,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <div style={{backgroundColor: '#282c34'}}>
-      <App></App>
+      <UserProvider>
+        <App></App>
+      </UserProvider>
     </div>
     
   </React.StrictMode>

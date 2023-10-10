@@ -1,40 +1,28 @@
-import React from 'react';
+import { useUserContext } from '../../Contexts/UserContext';
 import { UserModel, UserPrefsModel } from '../../Types';
-import './Settings.css'
+import './Settings.scss'
 
-interface P{
-  baseUrl: string,
-  user: UserModel,
-  changeUserPrefs: (userPrefs: UserPrefsModel) => void,
+interface SettingsProps{
   logout: () => void,
 }
 
-interface S{
-  textValue: string,
-}
+const Settings:React.FC<SettingsProps> = (props) => {
+  const { 
+    hideQuantity,
+    setHideQuantity,
+    shouldCreateNewItemWhenCreateNewCategory,
+    setShouldCreateNewItemWhenCreateNewCategory } = useUserContext();
 
-class Settings extends React.Component<P, S>{
-  constructor(props: P){
-    super(props);
+  const btn =  shouldCreateNewItemWhenCreateNewCategory? 'btn settings-button' : 'btn settings-button-disabled';
+  const btn2 = hideQuantity? 'btn settings-button' : 'btn settings-button-disabled';
 
-    this.state = {
-      textValue: this.props.baseUrl,
-    };
-  }
-
-  render(): React.ReactNode {
-    const { user } = this.props;
-    const btn =  user !== undefined && user.userPrefs.shouldCreateNewItemWhenCreateNewCategory? 'btn settings-button' : 'btn settings-button-disabled';
-    const btn2 = user !== undefined && user.userPrefs.hideQuantity? 'btn settings-button' : 'btn settings-button-disabled';
-
-    return(
-      <div className="settings-container">
-        <button className={btn} type="button" onClick={() => {this.props.changeUserPrefs({...user.userPrefs, shouldCreateNewItemWhenCreateNewCategory: !user.userPrefs.shouldCreateNewItemWhenCreateNewCategory})}}>{'Auto create new item when creating new category.'}</button>
-        <button className={btn2} type="button" onClick={() => {this.props.changeUserPrefs({...user.userPrefs, hideQuantity: !user?.userPrefs.hideQuantity})}}>{'Hide quantity information.'}</button>
-        <button className={'btn btn-logout'} type='button' onClick={this.props.logout}>Logout</button>
-      </div>
-    );
-  }
+  return(
+    <div className="settings-container">
+      <button className={btn} type="button" onClick={() => { setShouldCreateNewItemWhenCreateNewCategory(!shouldCreateNewItemWhenCreateNewCategory)}}>{'Auto create new item when creating new category.'}</button>
+      <button className={btn2} type="button" onClick={() => { setHideQuantity(!hideQuantity) }}>{'Hide quantity information.'}</button>
+      <button className={'btn btn-logout'} type='button' onClick={props.logout}>Logout</button>
+    </div>
+  );
 }
 
 export default Settings

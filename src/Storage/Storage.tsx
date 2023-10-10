@@ -1,15 +1,16 @@
-import {  toast } from 'react-toastify';
 import { UserModel } from '../Types';
 
 
 type StorageKeys = {
   JwtToken: string,
   User: string,
+  BaseUrl: string,
 };
 
 const keys: StorageKeys = {
   JwtToken: '@grocerylist:jwt',
   User: '@grocerylist:user',
+  BaseUrl: '@grocerylist:baseurl',
 };
 
 const storage = {
@@ -31,6 +32,14 @@ const storage = {
   },
   deleteUser(){
     localStorage.removeItem(keys.User)
+  },
+  getBaseUrl() : string{
+    const value = localStorage.getItem(keys.BaseUrl);
+    if(value === null) return 'http://localhost:5000/api'
+    else return value;
+  },
+  setBaseUrl(baseUrl: string) {
+    localStorage.setItem(keys.BaseUrl, baseUrl);
   },
 }
 

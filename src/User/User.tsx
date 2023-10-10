@@ -1,60 +1,45 @@
-import React from 'react';
-import './User.css';
+import React, { useState } from 'react';
+import './User.scss';
 import Login from './Login/Login';
 import Settings from './Settings/Settings';
-import { UserModel, UserPrefsModel } from '../Types';
 import storage from '../Storage/Storage';
+import { useUserContext } from '../Contexts/UserContext';
 
-interface P{
-  changeUser: (user: UserModel|null) => void,
-  changeBaseUrl: (baseurl: string) => void,
-  changeUserPrefs: (userPrefs: UserPrefsModel) => void,
-  baseUrl: string,
-  user: UserModel|null,
+interface UserProps{
 }
 
-interface S{
-  isShowingPreferences: boolean,
-}
+const User: React.FC<UserProps> = (props) => {
 
-class User extends React.Component<P,S>{
-  constructor(props: P){
-    super(props);
+  const [isShowingPreferences, setIsShowingPreferences] = useState(false);
+  const {user, setUser } =  useUserContext();
 
-    this.state = {
-      isShowingPreferences: false,
-    };  
+  const changeShowingUserSettings = () => {
+    setIsShowingPreferences(!isShowingPreferences);
   }
 
-  changeShowingUserSettings = () => {
-    this.setState({ isShowingPreferences: !this.state.isShowingPreferences });
-  }
-
-  logout = () => {
+  const logout = () => {
     storage.deleteToken();
     storage.deleteUser();
-    this.props.changeUser(null);
+    setUser(null);
   }
 
-  render(): React.ReactNode {
-    const { user } = this.props;
-    return(
-      <div className='col user-container'>
-        {user === null || user === undefined?
-          <Login changeUser={this.props.changeUser} baseUrl={this.props.baseUrl} changeBaseUrl={this.props.changeBaseUrl} logout={this.logout}></Login>
-          :
-          <React.Fragment>
-            <div className="user-top-bar">
-              <img className="user-image" src={'./images/user.png'} alt='meaningfull text' onClick={this.changeShowingUserSettings}></img>
-            </div>
-            {this.state.isShowingPreferences && 
-              <Settings user={user} baseUrl={this.props.baseUrl} changeUserPrefs={this.props.changeUserPrefs} logout={this.logout}></Settings>
-            }
-          </React.Fragment>
-        }
-      </div>
-    );
-  }
+  return(
+    <div className='user-container'>
+      {user === null || user === undefined?
+        <Login logout={logout}></Login>
+        :
+        <React.Fragment>
+          <div className="user-top-bar">
+            <img className="user-image" src={'./images/user.png'} alt='meaningfull text' onClick={changeShowingUserSettings}></img>
+          </div>
+          {isShowingPreferences && 
+            <Settings 
+              logout={logout}></Settings>
+          }
+        </React.Fragment>
+      }
+    </div>
+  );
 }
 
 export default User;

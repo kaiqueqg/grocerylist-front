@@ -1,75 +1,53 @@
-import React from 'react';
-import './Table.css';
-import { Category, GroceryList, Item, UserPrefsModel } from '../Types';
+import React, { useEffect, useState } from 'react';
+import './Table.scss';
+import { Category, GroceryList, Item } from '../Types';
 import { toast } from 'react-toastify';
 import CategoryRow from './Category/CategoryRow';
 import request from '../Requests/RequestFactory';
+import { useUserContext } from '../Contexts/UserContext';
 
-interface P{
-  baseUrl: string,
-  userPrefs: UserPrefsModel,
-  testIsServerUp: () => void,
+interface TableProps{
 }
 
-interface S{
-  data: GroceryList,
-  isGettingCategoryList: boolean,
-  areAllOpen: boolean,
-}
+const Table: React.FC<TableProps> = (props) => {
+  const [data, setData] = useState<GroceryList>({categories: []});
+  const [isGettingCategoryList, setIsGettingCategoryList] = useState<boolean>(false);
+  const [areAllOpen, setAreAllOpen] = useState<boolean>(false);
+  
+  const {shouldCreateNewItemWhenCreateNewCategory, baseUrl, testServer} = useUserContext();
 
-class Table extends React.Component<P, S> {
+  useEffect(() => {getCategoryList();}, []);
 
-  constructor(props: P){
-    super(props);
+  const getCategoryList = async () => {
+    setIsGettingCategoryList(true);
+    const response = await request(baseUrl + '/GetCategoryList', 'GET', undefined, () => {testServer();});
+    
+    if(response !== undefined && response.ok){
+      const data = await response.json();
 
-    this.state = {
-      data: {categories: []},
-      isGettingCategoryList: false,
-      areAllOpen: false,
-    }
-  }
-
-  componentDidMount(): void {
-    this.getCategoryList();
-  }
-
-  getCategoryList = async () => {
-    this.setState({
-      isGettingCategoryList: true
-    }, async () => {
-      const response = await request(this.props.baseUrl + '/GetCategoryList', 'GET', undefined, async () => {
-        this.props.testIsServerUp();
-      });
-      
-      if(response !== undefined && response.ok){
-        const data = await response.json();
-
-        let areAnyOneOpen = false;
-        for(let i = 0; i < data.length && !areAnyOneOpen; i++){
-          areAnyOneOpen = data[i].isOpen;
-        }
-
-        this.setState({
-          areAllOpen: areAnyOneOpen,
-          data: {categories: data},
-          isGettingCategoryList: false
-        });
+      let areAnyOneOpen = false;
+      for(let i = 0; i < data.length && !areAnyOneOpen; i++){
+        areAnyOneOpen = data[i].isOpen;
       }
-    });
+      setAreAllOpen(areAnyOneOpen);
+      setData({categories: data});
+      setIsGettingCategoryList(false);
+    }
+    setIsGettingCategoryList(true);
   }
 
-  addNewCategory = async () => {
+  const addNewCategory = async () => {
     let newCategory: Category = {
       id: '',
       text: '',
       isOpen: true,
     }
 
-    const response = await request(this.props.baseUrl + '/PutCategory', 'PUT', JSON.stringify(newCategory));
+    const response = await request(baseUrl + '/PutCategory', 'PUT', JSON.stringify(newCategory), () => {testServer();});
 
     if(response != null){
       if(response.ok){
-        if(this.props.userPrefs.shouldCreateNewItemWhenCreateNewCategory){
+        if(shouldCreateNewItemWhenCreateNewCategory){
           const category: Category = await response.json();
           const emptyItem: Item = {
             id: '',
@@ -81,10 +59,10 @@ class Table extends React.Component<P, S> {
             quantityUnit: '',
           };
 
-          const response2 = await request(this.props.baseUrl + '/PutItem', 'PUT', JSON.stringify(emptyItem));
+          await request(baseUrl + '/PutItem', 'PUT', JSON.stringify(emptyItem), () => {testServer();});
         }
 
-        this.getCategoryList();
+        getCategoryList();
       }
       else if(response.status === 409){
         toast.warning("Item already exist!");
@@ -95,43 +73,37 @@ class Table extends React.Component<P, S> {
     }
   }
 
-  redrawCallback = () => {
-    this.getCategoryList();
+  const redrawCallback = () => {
+    getCategoryList();
   }
 
-  render() {
-    const { data } = this.state;
-
-    return(
-      <React.Fragment>
-        <table key='table' className='grocerylist-table'>
-          <thead>
-            <tr className='header-row'>
-              <td>
-                <img src={'./images/doubledown-chevron.png'} className="unfold-image" alt='meaningfull text' style={{opacity: 0}}></img>
-              </td>
-              <td className='grocerylist-table-title'>
-                GROCERY LIST
-              </td>
-              <td>
-                <img src={'./images/add.png'} className="category-add-image" alt='meaningfull text' onClick={this.addNewCategory}></img>
-              </td>
-            </tr>
-          </thead>
-          <tbody key='tbody'>
-            { data.categories.map((category) => (
-              <CategoryRow 
-                key={'category' + category.id} 
-                baseUrl={this.props.baseUrl} 
-                userPrefs={this.props.userPrefs}
-                redrawCallback={this.redrawCallback}
-                category={category}></CategoryRow>
-            ))}
-          </tbody>
-        </table>
-      </React.Fragment>
-    );
-  }
+  return(
+    <>
+      <table key='table' className='grocerylist-table'>
+        <thead>
+          <tr className='header-row'>
+            <td>
+              <img src={'./images/doubledown-chevron.png'} className="unfold-image" alt='meaningfull text' style={{opacity: 0}}></img>
+            </td>
+            <td className='grocerylist-table-title'>
+              GROCERY LIST
+            </td>
+            <td>
+              <img src={'./images/add.png'} className="category-add-image" alt='meaningfull text' onClick={addNewCategory}></img>
+            </td>
+          </tr>
+        </thead>
+        <tbody key='tbody'>
+          { data.categories.map((category) => (
+            <CategoryRow 
+              key={'category' + category.id} 
+              redrawCallback={redrawCallback}
+              category={category}></CategoryRow>
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
 }
 
 export default Table;

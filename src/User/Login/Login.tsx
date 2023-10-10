@@ -1,41 +1,28 @@
-import React from 'react';
-import './Login.css'
+import React, { useEffect, useState } from 'react';
+import './Login.scss'
 import request from '../../Requests/RequestFactory'
 import { LoginModel, UserModel } from '../../Types'
 import Loading from '../../Loading/Loading';
 import { toast } from 'react-toastify';
 import storage from '../../Storage/Storage';
+import { useUserContext } from '../../Contexts/UserContext';
 
-interface Props{
-  changeUser: (newUser: UserModel|null) => void,
-  changeBaseUrl: (baseurl: string) => void,
+interface LoginProps{
   logout: () => void,
-  baseUrl: string,
 }
 
-interface States{
-  isLogging: boolean,
-  username: string, 
-  password: string
-}
+const Login: React.FC<LoginProps> = (props) => {
+  const [isLogging, setIsLogging] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-class Login extends React.Component<Props, States>{
+  const { baseUrl, setBaseUrl, setUser, testServer } = useUserContext();
 
-  constructor(props: Props){
-    super(props);
-
-    this.state = {
-      isLogging: false,
-      username: '',
-      password: ''
-    };
-  }
-
-  componentDidMount(): void {
-    this.login();
-  }
+  useEffect(() => {
+    login();
+  });
   
-  parseJwt = (token :string) => {
+  const parseJwt = (token :string) => {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -45,9 +32,7 @@ class Login extends React.Component<Props, States>{
     return JSON.parse(jsonPayload);
   }
 
-  requestAuthenticationToken = () => {
-    const { username, password } = this.state;
-
+  const requestAuthenticationToken = () => {
     if(username.trim() === ""){
       toast.warning("Type username to login!");
       return;
@@ -65,10 +50,13 @@ class Login extends React.Component<Props, States>{
     };
 
     const fetchData = async () => {
-      this.setState({ isLogging: true })
+      setIsLogging(true);
 
       try {
-        const response = await request(this.props.baseUrl + '/Login', 'POST', JSON.stringify(user));
+        const response = await request(baseUrl + '/Login', 'POST', JSON.stringify(user), () => {
+          toast.warning("Error trying to login!");
+          testServer();
+        });
 
         if(response !== undefined) {
           if(response.ok){
@@ -76,7 +64,7 @@ class Login extends React.Component<Props, States>{
             if(jsonData.user !== undefined && jsonData.token !== undefined){
               storage.setToken(jsonData.token);
               storage.setUser(jsonData.user);
-              this.props.changeUser(jsonData.user);
+              setUser(jsonData.user);
             }
           }
         }
@@ -84,29 +72,29 @@ class Login extends React.Component<Props, States>{
         console.log('Error:', error);
       }
       setTimeout(() => {
-      this.setState({ isLogging: false });
+        setIsLogging(false);
     }, 1000); 
     };
     fetchData();
   }
 
-  changeUsername = (event: any) => {
-    this.setState({
-      username: event.target.value
-    });
+  const changeBaseUrl = (event: any) =>{
+    setBaseUrl(event.target.value);
   }
 
-  changePassword = (event: any) => {
-    this.setState({
-      password: event.target.value
-    });
+  const changeUsername = (event: any) => {
+    setUsername(event.target.value);
   }
 
-  checkForLoginToken = () =>{
+  const changePassword = (event: any) => {
+    setPassword(event.target.value);
+  }
+
+  const checkForLoginToken = () =>{
     const token = storage.getToken();
 
     if(token != null && token !== undefined){
-      const parsedToken = this.parseJwt(token);
+      const parsedToken = parseJwt(token);
       const now = new Date();
       const tokenDate = new Date(parsedToken.exp * 1000);
 
@@ -116,50 +104,46 @@ class Login extends React.Component<Props, States>{
     return false;
   }
 
-  login = () => {
+  const login = () => {
     const token = storage.getToken();
     const user = storage.getUser();
 
     if(token != null && token !== undefined && user != null && user !== undefined){
-      const parsedToken = this.parseJwt(token);
+      const parsedToken = parseJwt(token);
       const now = new Date();
       const tokenDate = new Date(parsedToken.exp * 1000);
 
       if(tokenDate > now){
-        this.props.changeUser(storage.getUser());
+        setUser(storage.getUser());
       }
       else{
-        this.props.logout();
+        props.logout();
       }
     }
   }
 
-  render(): React.ReactNode {
-    const { isLogging } = this.state;
-
-    return(
-      <div className='login-container'>
-        {!isLogging ? 
-          <div className="col login-box">
-            <div className='login-row'>
-              <input key='baseurl' type="text" className="form-control baseurl" placeholder={this.props.baseUrl} aria-label="BaseUrl"></input>
-            </div>
-            <div className="login-row">
-              <input className="form-control username" type="text" onChange={this.changeUsername}  placeholder="Username" aria-label="Username"></input>
-            </div>
-            <div className="login-row">
-              <input className="form-control password"  type="password" onChange={this.changePassword} placeholder="Password" aria-label="Server"></input>
-            </div>
-            <div className="login-row">
-              <button className="btn btn-login" type="button"  onClick={this.requestAuthenticationToken}>Login</button>
-            </div>
+  return(
+    <div className='login-container'>
+      {!isLogging ? 
+        <div className="col login-box">
+          <div className='login-row'>
+            <input className="form-control baseurl" type="text" onChange={changeBaseUrl} value={baseUrl} placeholder={baseUrl} aria-label="BaseUrl"></input>
           </div>
-          :
-          <Loading></Loading>
-        }
-      </div>
-    );
-  }
+          <div className="login-row">
+            <input className="form-control username" type="text" onChange={changeUsername}  placeholder="Username" aria-label="Username"></input>
+          </div>
+          <div className="login-row">
+            <input className="form-control password"  type="password" onChange={changePassword} placeholder="Password" aria-label="Server"></input>
+          </div>
+          <div className="login-row">
+            <button className="btn-login" type="button"  onClick={requestAuthenticationToken}>Login</button>
+          </div>
+        </div>
+        :
+        <Loading></Loading>
+      }
+    </div>
+  );
 }
 
 export default Login

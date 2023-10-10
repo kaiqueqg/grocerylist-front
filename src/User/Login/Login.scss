@@ -1,8 +1,12 @@
+@import '../../Colors.scss';
+
 .login-container{
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100%;
+  padding: 0px;
 }
 
 .login-box{
@@ -11,6 +15,8 @@
 
 .login-row{
   margin: 2% 1% 2% 1%;
+  display: flex;
+  justify-content: end;
 }
 
 .baseurl{
@@ -19,7 +25,7 @@
 }
 
 .baseurl::placeholder{
-  color: #5F5F5F  ;
+  color: $grey  ;
 }
 
 .username{
@@ -28,7 +34,7 @@
 }
 
 .username::placeholder{
-  color: #5F5F5F  ;
+  color: $placeholder-dark;
 }
 
 .password{
@@ -37,18 +43,19 @@
 }
 
 .password::placeholder{
-  color: #5F5F5F;
+  color: $placeholder-dark;
 }
 
 .btn-login{
-  border-color: #1D1D1D;
   color: #1D1D1D;
   background-color: beige;
+  border: 1px solid #1D1D1D;
+  border-radius: 5px;
+  padding: 5px 10px 5px 10px;
 }
 
-.btn-login:hover{
-  border-color: #1D1D1D;
-  color: #1D1D1D;
-  background-color: white;
-}
-
+.btn-login:active{ 
+  border-color: $beige;
+  color: $beige;
+  background-color: $blue-darker;
+} 

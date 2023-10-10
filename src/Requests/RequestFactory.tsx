@@ -1,17 +1,21 @@
 import {  toast } from 'react-toastify';
+import { useUserContext } from '../Contexts/UserContext';
+import storage from '../Storage/Storage';
 
 const errors = [400, 401, 404, 409, 500, 503]
+
 
 async function request(
   endpoint: string, 
   method: string, 
   body?: string,
   fError?: () => void): Promise<any>
-{
+  {
   const headers: {[key: string]: string} = {};
   headers['Content-Type'] = 'application/json';
+  
 
-  const token = localStorage.getItem('jwt');
+  const token = storage.getToken();
   if(token !== null) headers['Authorization'] = "Bearer " + token;
 
   try {
@@ -29,7 +33,10 @@ async function request(
     return response;
   } catch (error) {
     if(fError !== undefined) fError();
-    else toast.error("Untreated error...", { autoClose: 5000 });
+    else {
+      console.log('Untreated error...');
+      //toast.error("Untreated error...", { autoClose: 5000 });
+    }
     return undefined;
   }
 }
